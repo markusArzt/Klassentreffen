@@ -50,11 +50,19 @@ function showTab(name) {
 
 // ── FORMAT DAY ───────────────────────────────────────────────────────────────
 function formatDay(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00');
-  const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-  const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-                  'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-  return `${days[d.getDay()]}, ${d.getDate()}. ${months[d.getMonth()]}`;
+  // Parse manually to avoid browser timezone/Invalid Date issues
+  // Expected format: "YYYY-MM-DD"
+  if (!dateStr || typeof dateStr !== 'string') return '?';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  const d = new Date(year, month, day);
+  const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+  return `${dayNames[d.getDay()]}, ${d.getDate()}. ${monthNames[d.getMonth()]}`;
 }
 
 // ── LOAD DATA FROM API ───────────────────────────────────────────────────────

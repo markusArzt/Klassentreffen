@@ -53,7 +53,8 @@ const Admin = (() => {
     State.days.forEach(day => {
       const tag = document.createElement('div');
       tag.className = 'day-tag';
-      tag.innerHTML = `${formatDay(day)} <span class="rm">×</span>`;
+      const label = typeof formatDay === 'function' ? formatDay(day) : day;
+      tag.innerHTML = `${label} <span class="rm">×</span>`;
       tag.querySelector('.rm').addEventListener('click', () => removeDay(day));
       list.appendChild(tag);
     });
