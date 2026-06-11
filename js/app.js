@@ -45,7 +45,11 @@ function showTab(name) {
   document.querySelectorAll('.tab').forEach((el, i) => {
     el.classList.toggle('active', ['abstimmen', 'ergebnisse', 'admin'][i] === name);
   });
-  if (name === 'ergebnisse') renderResults();
+  if (name === 'ergebnisse') {
+    renderResults();
+    // Silently refresh in background
+    fetchAndUpdate().then(() => renderResults());
+  }
 }
 
 // ── FORMAT DAY ───────────────────────────────────────────────────────────────
@@ -65,13 +69,76 @@ function formatDay(dateStr) {
   return `${dayNames[d.getDay()]}, ${d.getDate()}. ${monthNames[d.getMonth()]}`;
 }
 
+// ── CACHE ────────────────────────────────────────────────────────────────────
+const CACHE_KEY = 'klass_data';
+const CACHE_TTL = 30 * 1000; // 30 seconds
+
+function saveCache(data) {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+  } catch (_) {}
+}
+
+function loadCache() {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { ts, data } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null;
+    return data;
+  } catch (_) { return null; }
+}
+
+function clearCache() {
+  sessionStorage.removeItem(CACHE_KEY);
+}
+
+// ── SKELETON ─────────────────────────────────────────────────────────────────
+function showSkeleton() {
+  const matrix = document.getElementById('vote-matrix');
+  matrix.innerHTML = Array.from({ length: 6 }, () => `
+    <div class="skeleton-row">
+      <div class="skeleton skeleton-day"></div>
+      <div class="skeleton skeleton-cell"></div>
+      <div class="skeleton skeleton-cell"></div>
+      <div class="skeleton skeleton-cell"></div>
+    </div>
+  `).join('');
+
+  const list = document.getElementById('participants-list');
+  list.innerHTML = Array.from({ length: 4 }, () =>
+    `<span class="skeleton" style="width:60px;height:22px;border-radius:20px"></span>`
+  ).join('');
+}
+
 // ── LOAD DATA FROM API ───────────────────────────────────────────────────────
-async function loadData() {
+async function loadData(forceRefresh = false) {
+  // Try cache first
+  if (!forceRefresh) {
+    const cached = loadCache();
+    if (cached) {
+      State.days = Array.isArray(cached.days) ? cached.days : [];
+      State.votes = (cached.votes && typeof cached.votes === 'object') ? cached.votes : {};
+      renderVotingTab();
+      renderParticipants();
+      // Refresh in background silently
+      fetchAndUpdate();
+      return;
+    }
+  }
+
+  // No cache — show skeleton and fetch
+  showSkeleton();
+  await fetchAndUpdate();
+}
+
+async function fetchAndUpdate() {
   try {
     const data = await API.getData();
     console.log('API response:', JSON.stringify(data));
     State.days = Array.isArray(data.days) ? data.days : [];
     State.votes = (data.votes && typeof data.votes === 'object') ? data.votes : {};
+    saveCache({ days: State.days, votes: State.votes });
     renderVotingTab();
     renderParticipants();
   } catch (e) {
@@ -242,8 +309,9 @@ async function saveVotes() {
   try {
     const userVotes = State.votes[State.currentUser] || {};
     await API.saveVotes(State.currentUser, userVotes);
+    clearCache();
     showToast('Abstimmung gespeichert!', 'success');
-    await loadData();
+    await loadData(true);
   } catch (e) {
     showToast('Fehler beim Speichern', 'error');
     console.error(e);
