@@ -280,6 +280,15 @@ function renderParticipants() {
     const tag = document.createElement('span');
     tag.className = 'participant-tag' + (name === State.currentUser ? ' active-user' : '');
     tag.textContent = name;
+    tag.style.cursor = 'pointer';
+    tag.addEventListener('click', () => {
+      document.getElementById('name-input').value = name;
+      State.currentUser = name;
+      saveSession();
+      renderVotingTab();
+      renderParticipants();
+      showToast(`${name} geladen`, 'success');
+    });
     list.appendChild(tag);
   });
 }
