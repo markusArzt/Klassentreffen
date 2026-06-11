@@ -7,7 +7,7 @@
 const API = (() => {
   // ── CONFIG ──────────────────────────────────────────────────────────────
   // After deploying the Apps Script (see README.md), paste the URL here:
-  const SCRIPT_URL = https://script.google.com/macros/s/AKfycbzD7OcIInhxngWRg1hcGHmKizmf6XZie3dbC-4CfcMup4inm_LruR8cGXtg5SJ29ZnE/exec;
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzD7OcIInhxngWRg1hcGHmKizmf6XZie3dbC-4CfcMup4inm_LruR8cGXtg5SJ29ZnE/exec';
 
   // ── HELPERS ─────────────────────────────────────────────────────────────
   async function request(action, payload = {}) {
