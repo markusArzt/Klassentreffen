@@ -69,13 +69,14 @@ function formatDay(dateStr) {
 async function loadData() {
   try {
     const data = await API.getData();
-    State.days = data.days || [];
-    State.votes = data.votes || {};
+    console.log('API response:', JSON.stringify(data));
+    State.days = Array.isArray(data.days) ? data.days : [];
+    State.votes = (data.votes && typeof data.votes === 'object') ? data.votes : {};
     renderVotingTab();
     renderParticipants();
   } catch (e) {
     showToast('Fehler beim Laden der Daten', 'error');
-    console.error(e);
+    console.error('loadData error:', e);
   }
 }
 

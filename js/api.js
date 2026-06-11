@@ -7,29 +7,32 @@
 const API = (() => {
   // ── CONFIG ──────────────────────────────────────────────────────────────
   // After deploying the Apps Script (see README.md), paste the URL here:
-  const SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzD7OcIInhxngWRg1hcGHmKizmf6XZie3dbC-4CfcMup4inm_LruR8cGXtg5SJ29ZnE/exec';
 
   // ── HELPERS ─────────────────────────────────────────────────────────────
   async function request(action, payload = {}) {
-    // Google Apps Script requires GET with payload as query param to avoid
-    // CORS preflight / 302 redirect issues from external origins
     const url = new URL(SCRIPT_URL);
     url.searchParams.set('action', action);
     url.searchParams.set('payload', JSON.stringify(payload));
 
+    // Apps Script redirects to googleusercontent.com — we must follow and read that
     const res = await fetch(url.toString(), {
       method: 'GET',
       redirect: 'follow',
+      mode: 'cors',
+      credentials: 'omit',
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const text = await res.text();
+    const cleaned = text.trim().replace(/^\uFEFF/, '');
+
     let data;
     try {
-      data = JSON.parse(text);
+      data = JSON.parse(cleaned);
     } catch {
-      throw new Error('Ungültige Antwort vom Server: ' + text.slice(0, 100));
+      throw new Error('Ungültige Antwort: ' + cleaned.slice(0, 200));
     }
 
     if (data.error) throw new Error(data.error);
