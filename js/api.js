@@ -61,5 +61,13 @@ const API = (() => {
     return request('changePassword', { oldPassword, newPassword });
   }
 
-  return { getData, saveVotes, verifyAdmin, setDays, changePassword };
+  async function deleteAllData() {
+    return request('deleteAllData');
+  }
+
+  async function deleteVotes(name) {
+    return request('deleteVotes', { name });
+  }
+
+  return { getData, saveVotes, verifyAdmin, setDays, changePassword, deleteAllData, deleteVotes };
 })();

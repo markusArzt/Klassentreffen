@@ -9,7 +9,7 @@ const State = {
   days: [],                // array of day strings e.g. ["2025-07-05", ...]
   votes: {},               // { participantName: { "2025-07-05_Linz": true, ... } }
   orte: ['Linz', 'Salzburg', 'Wien'],
-  defaultOrte: [0,1,2],         // indices into orte[], loaded from sessionStorage
+  defaultOrte: [],         // indices into orte[], loaded from sessionStorage
 };
 
 // ── SESSION STORAGE ──────────────────────────────────────────────────────────
@@ -18,7 +18,7 @@ function loadSession() {
   try {
     State.defaultOrte = JSON.parse(sessionStorage.getItem('klass_defaults') || '[0,1,2]');
   } catch {
-    State.defaultOrte = [];
+    State.defaultOrte = [0,1,2];
   }
 }
 
@@ -278,19 +278,50 @@ function renderParticipants() {
 
   names.forEach(name => {
     const tag = document.createElement('span');
-    tag.className = 'participant-tag' + (name === State.currentUser ? ' active-user' : '');
-    tag.textContent = name;
+    const isActive = name === State.currentUser;
+    tag.className = 'participant-tag' + (isActive ? ' active-user' : '');
     tag.style.cursor = 'pointer';
-    tag.addEventListener('click', () => {
-      document.getElementById('name-input').value = name;
-      State.currentUser = name;
-      saveSession();
-      renderVotingTab();
-      renderParticipants();
-      showToast(`${name} geladen`, 'success');
-    });
+
+    if (isActive) {
+      tag.innerHTML = `${name} <span class="tag-remove" title="Abstimmung löschen">×</span>`;
+      tag.querySelector('.tag-remove').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteSelf();
+      });
+    } else {
+      tag.textContent = name;
+      tag.addEventListener('click', () => {
+        document.getElementById('name-input').value = name;
+        State.currentUser = name;
+        saveSession();
+        renderVotingTab();
+        renderParticipants();
+        showToast(`${name} geladen`, 'success');
+      });
+    }
+
     list.appendChild(tag);
   });
+}
+
+// ── DELETE SELF ───────────────────────────────────────────────────────────────
+async function deleteSelf() {
+  if (!State.currentUser) return;
+  if (!confirm(`Abstimmung von "${State.currentUser}" wirklich löschen?`)) return;
+  try {
+    await API.deleteVotes(State.currentUser);
+    clearCache();
+    delete State.votes[State.currentUser];
+    State.currentUser = null;
+    sessionStorage.removeItem('klass_user');
+    document.getElementById('name-input').value = '';
+    renderVotingTab();
+    renderParticipants();
+    showToast('Abstimmung gelöscht', 'success');
+  } catch (e) {
+    showToast('Fehler beim Löschen', 'error');
+    console.error(e);
+  }
 }
 
 // ── NAME / LOGIN ─────────────────────────────────────────────────────────────
