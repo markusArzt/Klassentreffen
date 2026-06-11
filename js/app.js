@@ -9,14 +9,14 @@ const State = {
   days: [],                // array of day strings e.g. ["2025-07-05", ...]
   votes: {},               // { participantName: { "2025-07-05_Linz": true, ... } }
   orte: ['Linz', 'Salzburg', 'Wien'],
-  defaultOrte: [],         // indices into orte[], loaded from sessionStorage
+  defaultOrte: [0,1,2],         // indices into orte[], loaded from sessionStorage
 };
 
 // ── SESSION STORAGE ──────────────────────────────────────────────────────────
 function loadSession() {
   State.currentUser = sessionStorage.getItem('klass_user') || null;
   try {
-    State.defaultOrte = JSON.parse(sessionStorage.getItem('klass_defaults') || '[]');
+    State.defaultOrte = JSON.parse(sessionStorage.getItem('klass_defaults') || '[0,1,2]');
   } catch {
     State.defaultOrte = [];
   }
