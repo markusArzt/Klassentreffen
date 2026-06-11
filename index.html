@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8C Klassentreffen</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header>
+  <div class="logo">8C <span>Klassentreffen</span></div>
+  <div class="admin-badge" onclick="showTab('admin')">🔒 Admin</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('abstimmen')">Abstimmen</div>
+  <div class="tab" onclick="showTab('ergebnisse')">Ergebnisse</div>
+  <div class="tab" onclick="showTab('admin')">Admin</div>
+</div>
+
+<!-- ═══════════ ABSTIMMEN ═══════════ -->
+<main id="tab-abstimmen">
+
+  <div class="name-bar">
+    <label>Name</label>
+    <input type="text" id="name-input" placeholder="Dein Name" autocomplete="off">
+    <button class="btn btn-primary btn-sm" id="load-btn">Laden</button>
+    <span class="name-hint">Bitte Namensdopplung vermeiden!</span>
+  </div>
+
+  <div class="participants-bar">
+    <span class="participants-label">Bereits abgestimmt:</span>
+    <div class="participants-list" id="participants-list">
+      <span class="participants-empty">Noch niemand abgestimmt</span>
+    </div>
+  </div>
+
+  <div class="defaults-bar">
+    <label>Standard:</label>
+    <div id="ort-chips"></div>
+    <span class="defaults-hint">Beim Anklicken eines Tags werden diese Orte automatisch gewählt</span>
+  </div>
+
+  <div class="matrix-wrap">
+    <div class="matrix-header">
+      <div class="matrix-header-cell">Tag</div>
+      <div class="matrix-header-cell">L</div>
+      <div class="matrix-header-cell">S</div>
+      <div class="matrix-header-cell">W</div>
+    </div>
+    <div id="vote-matrix">
+      <div class="empty-state">Daten werden geladen…</div>
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <button class="btn btn-primary" id="save-btn">Speichern</button>
+  </div>
+
+</main>
+
+<!-- ═══════════ ERGEBNISSE ═══════════ -->
+<main id="tab-ergebnisse" style="display:none">
+
+  <div class="results-title" id="results-title">Ergebnisse </div>
+  <div id="results-container">
+    <div class="empty-state">Daten werden geladen…</div>
+  </div>
+
+</main>
+
+<!-- ═══════════ ADMIN ═══════════ -->
+<main id="tab-admin" style="display:none">
+
+  <div id="admin-lock">
+    <div class="lock-wrap">
+      <div class="icon">🔒</div>
+      <p>Admin-Bereich — Passwort eingeben</p>
+      <input type="password" id="admin-pw" placeholder="••••••••">
+      <button class="btn btn-primary" id="admin-unlock-btn">Entsperren</button>
+    </div>
+  </div>
+
+  <div id="admin-content" style="display:none">
+
+    <div class="admin-card">
+      <h3>Schnell-Setup: Monat hinzufügen</h3>
+      <div class="month-chips" id="month-chips"></div>
+      <p class="hint">Fügt alle Samstage und Sonntage des gewählten Monats hinzu.</p>
+      <hr class="divider">
+      <h3>Aktive Tage</h3>
+      <div class="day-list" id="day-list"></div>
+    </div>
+
+    <div class="admin-card">
+      <h3>Passwort ändern</h3>
+      <div class="input-row">
+        <input type="password" id="old-pw" placeholder="Aktuelles Passwort">
+        <input type="password" id="new-pw" placeholder="Neues Passwort">
+        <button class="btn btn-primary btn-sm" id="change-pw-btn">Speichern</button>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
